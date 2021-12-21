@@ -53,34 +53,47 @@ static (HashSet<(int X, int Y, int Z)> c1, HashSet<(int X, int Y, int Z)> c2, (i
 	var combinations2 = CreateCombinations(scanner2);
 	foreach (var c1 in combinations1)
 	{
+		var mapX = c1.Select(e => e.X).ToHashSet();
+		var mapY = c1.Select(e => e.Y).ToHashSet();
+		var mapZ = c1.Select(e => e.Z).ToHashSet();
+
 		var matchesX = new HashSet<int>();
 		var matchesY = new HashSet<int>();
 		var matchesZ = new HashSet<int>();
 		foreach (var c2 in combinations2)
 		{
 			const int range = 2000;
-			for (var x = -range; x < range; x++)
+			for (var a = -range; a < range; a++)
 			{
-				var count = c2.Count(e2 => c1.Any(e1 => e1.X == e2.X + x));
-				if (count >= 12)
+				var countX = 0;
+				var countY = 0;
+				var countZ = 0;
+				foreach (var e2 in c2)
 				{
-					matchesX.Add(x);
+					if (mapX.Contains(e2.X + a))
+					{
+						countX++;
+					}
+					if (mapY.Contains(e2.Y + a))
+					{
+						countY++;
+					}
+					if (mapZ.Contains(e2.Z + a))
+					{
+						countZ++;
+					}
 				}
-			}
-			for (var y = -range; y < range; y++)
-			{
-				var count = c2.Count(e2 => c1.Any(e1 => e1.Y == e2.Y + y));
-				if (count >= 12)
+				if (countX >= 12)
 				{
-					matchesY.Add(y);
+					matchesX.Add(a);
 				}
-			}
-			for (var z = -range; z < range; z++)
-			{
-				var count = c2.Count(e2 => c1.Any(e1 => e1.Z == e2.Z + z));
-				if (count >= 12)
+				if (countY >= 12)
 				{
-					matchesZ.Add(z);
+					matchesY.Add(a);
+				}
+				if (countZ >= 12)
+				{
+					matchesZ.Add(a);
 				}
 			}
 		}
