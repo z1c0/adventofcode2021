@@ -7,138 +7,211 @@ Console.WriteLine($"END (after {sw.Elapsed.TotalSeconds} seconds)");
 
 static void Part1()
 {
-	var scanners = ReadInput();
-	while (scanners.Count > 1)
+	var scans = ReadInput();
+	var scannerPositions = new HashSet<(int X, int Y, int Z)> { ( 0, 0, 0) };
+	while (scans.Count > 1)
 	{
-		for (var i = 0; i < scanners.Count; i++)
+		for (var i = 1; i < scans.Count; i++)
 		{
-			var found = false;
-			for (var j = i + 1; j < scanners.Count; j++)
+			var s1 = scans[0];
+			var s2 = scans[i];
+			TryMatchMerge(s1, s2, scans, scannerPositions);
+		}
+	}
+	Console.WriteLine($"Number of beacons: {scans.Single().Count}");
+
+	var max = int.MinValue;
+	foreach (var p1 in scannerPositions)
+	{
+		foreach (var p2 in scannerPositions)
+		{
+			if (p1 != p2)
 			{
-				var s1 = scanners[i];
-				var s2 = scanners[j];
-				Console.WriteLine($"matching ... ({i} and {j} of {scanners.Count})");
-				var m = Match(s1, s2);
-				if (m != null)
-				{
-					var c1 = m.Value.c1;
-					var c2 = m.Value.c2;
-					var p = m.Value.p;
-					Console.WriteLine("before: " + c1.Count);
-					foreach (var (x, y, z) in c2)
-					{ 
-						var pp = (p.X + x, p.Y + y, p.Z + z);
-						c1.Add(pp);
-					}
-					Console.WriteLine("before: " + c1.Count);
-					scanners.Remove(s1);
-					scanners.Remove(s2);
-					scanners.Add(c1);
-					found = true;
-					break;
-				}
-				if (found)
-				{
-					break;
-				}
+				var d = Math.Abs(p1.X - p2.X) + Math.Abs(p1.Y - p2.Y) + Math.Abs(p1.Z - p2.Z);
+				max = Math.Max(max, d);
 			}
 		}
 	}
-	Console.WriteLine(scanners.Single().Count);
+	Console.WriteLine($"Maximum distance between two scanners: {max}");
 }
 
-static (HashSet<(int X, int Y, int Z)> c1, HashSet<(int X, int Y, int Z)> c2, (int X, int Y, int Z) p)? Match(HashSet<(int X, int Y, int Z)> scanner1, HashSet<(int X, int Y, int Z)> scanner2)
+static bool TryMatchMerge(HashSet<(int X, int Y, int Z)> scan1, HashSet<(int X, int Y, int Z)> scan2, List<HashSet<(int X, int Y, int Z)>> scans, HashSet<(int X, int Y, int Z)> scannerPositions)
 {
-	var combinations1 = CreateCombinations(scanner1);
-	var combinations2 = CreateCombinations(scanner2);
-	foreach (var c1 in combinations1)
-	{
-		var mapX = c1.Select(e => e.X).ToHashSet();
-		var mapY = c1.Select(e => e.Y).ToHashSet();
-		var mapZ = c1.Select(e => e.Z).ToHashSet();
+	var dictX = new Dictionary<int, int>();
+	var dictNX1 = new Dictionary<int, int>();
+	var dictNX2 = new Dictionary<int, int>();
+	var dictXY = new Dictionary<int, int>();
+	var dictNXY = new Dictionary<int, int>();
+	var dictXZ = new Dictionary<int, int>();
+	var dictNXZ = new Dictionary<int, int>();
 
-		var matchesX = new HashSet<int>();
-		var matchesY = new HashSet<int>();
-		var matchesZ = new HashSet<int>();
-		foreach (var c2 in combinations2)
+	var dictY = new Dictionary<int, int>();
+	var dictNY1 = new Dictionary<int, int>();
+	var dictNY2 = new Dictionary<int, int>();
+	var dictYZ = new Dictionary<int, int>();
+	var dictNYZ = new Dictionary<int, int>();
+	var dictYX = new Dictionary<int, int>();
+	var dictNYX = new Dictionary<int, int>();
+
+	var dictZ = new Dictionary<int, int>();
+	var dictNZ1 = new Dictionary<int, int>();
+	var dictNZ2 = new Dictionary<int, int>();
+	var dictZX = new Dictionary<int, int>();
+	var dictNZX = new Dictionary<int, int>();
+	var dictZY = new Dictionary<int, int>();
+	var dictNZY = new Dictionary<int, int>();
+
+	static void Add(Dictionary<int, int> dict, int d)
+	{
+		dict.TryAdd(d, 0);
+		dict[d]++;
+	}
+
+	foreach (var e1 in scan1)
+	{
+		foreach (var e2 in scan2)
 		{
-			const int range = 2000;
-			for (var a = -range; a < range; a++)
+			// x
+			Add(dictX,    e1.X + e2.X);
+			Add(dictNX2,  e1.X - e2.X);
+			Add(dictNX1, -e1.X + e2.X);
+			Add(dictXY,   e1.X + e2.Y);
+			Add(dictNXY,  e1.X - e2.Y);
+			Add(dictXZ,   e1.X + e2.Z);
+			Add(dictNXZ,  e1.X - e2.Z);
+
+			// y
+			Add(dictY,    e1.Y + e2.Y);
+			Add(dictNY2,  e1.Y - e2.Y);
+			Add(dictNY1, -e1.Y + e2.Y);
+			Add(dictYX,   e1.Y + e2.X);
+			Add(dictNYX,  e1.Y - e2.X);
+			Add(dictYZ,   e1.Y + e2.Z);
+			Add(dictNYZ,  e1.Y - e2.Z);
+
+			// z
+			Add(dictZ,    e1.Z + e2.Z);
+			Add(dictNZ2,  e1.Z - e2.Z);
+			Add(dictNZ1, -e1.Z + e2.Z);
+			Add(dictZX,   e1.Z + e2.X);
+			Add(dictNZX,  e1.Z - e2.X);
+			Add(dictZY,   e1.Z + e2.Y);
+			Add(dictNZY,  e1.Z - e2.Y);
+		}
+	}
+
+	static bool Collect(Dictionary<int, int> dict, List<(int v, int f1, int f2, bool switch1, bool switch2)> list, int f1, int f2, bool switch1, bool switch2)
+	{
+		if (dict.Any(e => e.Value >= 12))
+		{
+			var max = dict.Max(e => e.Value);
+			foreach (var v in dict.Where(e => e.Value == max).Select(e => e.Key))
 			{
-				var countX = 0;
-				var countY = 0;
-				var countZ = 0;
-				foreach (var e2 in c2)
+				list.Add((v, f1, f2, switch1, switch2));
+			}
+			return true;
+		}
+		return false;
+	}
+
+	// x
+	var xList = new List<(int x, int fx1, int fx2, bool switchXY, bool switchXZ)>();
+	Collect(dictX, xList, 1, 1, false, false);
+	Collect(dictNX1, xList, -1, 1, false, false);
+	Collect(dictNX2, xList, 1, -1, false, false);
+	Collect(dictXY, xList, 1, 1, true, false);
+	Collect(dictNXY, xList, 1, -1, true, false);
+	Collect(dictXZ, xList, 1, 1, false, true);
+	Collect(dictNXZ, xList, 1, -1, false, true);
+
+	// y
+	var yList = new List<(int y, int fy1, int fy2, bool switchYZ, bool switchYX)>();
+	Collect(dictY, yList, 1, 1, false, false);
+	Collect(dictNY1, yList, -1, 1, false, false);
+	Collect(dictNY2, yList, 1, -1, false, false);
+	Collect(dictYZ, yList, 1, 1, true, false);
+	Collect(dictNYZ, yList, 1, -1, true, false);
+	Collect(dictYX, yList, 1, 1, false, true);
+	Collect(dictNYX, yList, 1, -1, false, true); 
+
+	// z
+	var zList = new List<(int z, int fz1, int fz2, bool switchZX, bool switchZY)>();
+	Collect(dictZ, zList, 1, 1, false, false);
+	Collect(dictNZ1, zList, -1, 1, false, false);
+	Collect(dictNZ2, zList, 1, -1, false, false);
+	Collect(dictZX, zList, 1, 1, true, false);
+	Collect(dictNZX, zList, 1, -1, true, false);
+	Collect(dictZY, zList, 1, 1, false, true);
+	Collect(dictNZY, zList, 1, -1, false, true);
+
+	static (int, int, int) MakePoint((int X, int Y, int Z) e2, (int x, int fx1, int fx2, bool switchXY, bool switchXZ) tx, (int y, int fy1, int fy2, bool switchYZ, bool switchYX) ty, (int z, int fz1, int fz2, bool switchZX, bool switchZY) tz)
+	{
+		var ex = e2.X;
+		var ey = e2.Y;
+		var ez = e2.Z;
+		if (tx.switchXY)
+		{
+			ex = e2.Y;
+		}
+		if (tx.switchXZ)
+		{
+			ex = e2.Z;
+		}
+		if (ty.switchYZ)
+		{
+			ey = e2.Z;
+		}
+		if (ty.switchYX)
+		{
+			ey = e2.X;
+		}
+		if (tz.switchZX)
+		{
+			ez = e2.X;
+		}
+		if (tz.switchZY)
+		{
+			ez = e2.Y;
+		}
+		return (tx.fx1 * (tx.x - tx.fx2 * ex), ty.fy1 * (ty.y - ty.fy2 * ey), tz.fz1 * (tz.z - tz.fz2 * ez));
+	}
+
+	foreach (var tz in zList)
+	{
+		foreach (var ty in yList)
+		{
+			foreach (var tx in xList)
+			{
+				var p = (tx.x, ty.y, tz.z);
+				
+				var count = 0;
+				foreach (var e2 in scan2)
 				{
-					if (mapX.Contains(e2.X + a))
+					p = MakePoint(e2, tx, ty, tz);
+					if (scan1.Contains(p))
 					{
-						countX++;
-					}
-					if (mapY.Contains(e2.Y + a))
-					{
-						countY++;
-					}
-					if (mapZ.Contains(e2.Z + a))
-					{
-						countZ++;
+						count++;
 					}
 				}
-				if (countX >= 12)
+
+				if (count >= 12)
 				{
-					matchesX.Add(a);
-				}
-				if (countY >= 12)
-				{
-					matchesY.Add(a);
-				}
-				if (countZ >= 12)
-				{
-					matchesZ.Add(a);
+					foreach (var e2 in scan2)
+					{
+						scannerPositions.Add((tx.fx1 * tx.x, ty.fy1 * ty.y, tz.fz1 * tz.z));
+						p = MakePoint(e2, tx, ty, tz);
+						if (!scan1.Contains(p))
+						{
+							scan1.Add(p);
+						}
+					}
+					scans.Remove(scan2);
+					return true;
 				}
 			}
 		}
-		if (matchesX.Any() && matchesY.Any() && matchesZ.Any())
-		{
-			var x = matchesX.Single();
-			var y = matchesY.Single();
-			var z = matchesZ.Single();
-			foreach (var c2 in combinations2)
-			{
-				if (c2.Count(e => c1.Contains((e.X + x, e.Y + y, e.Z + z))) >= 12)
-				{
-					return (c1, c2, (x, y, z));
-				}
-			}
-		}
 	}
-	return null;
-}
-
-static IEnumerable<HashSet<(int X, int Y, int Z)>> CreateCombinations(HashSet<(int X, int Y, int Z)> scanner)
-{
-	static void Permutate(HashSet<(int X, int Y, int Z)>[] combinations, int i, int x, int y, int z)
-	{
-		combinations[i + 0].Add(( x,  y, -z));
-		combinations[i + 1].Add(( x,  y,  z));
-		combinations[i + 2].Add(( x, -y, -z));
-		combinations[i + 3].Add(( x, -y,  z));
-		combinations[i + 4].Add((-x,  y, -z));
-		combinations[i + 5].Add((-x,  y,  z));
-		combinations[i + 6].Add((-x, -y, -z));
-		combinations[i + 7].Add((-x, -y,  z));
-	}
-	var combinations = new HashSet<( int X, int Y, int Z)>[24];
-	for (var i = 0; i < combinations.Length; i++)
-	{
-		combinations[i] = new();
-	}
-	foreach (var (x, y, z) in scanner)
-	{
-		Permutate(combinations,  0, x, y, z);
-		Permutate(combinations,  8, y, x, z);
-		Permutate(combinations, 16, z, x, y);
-	}
-	return combinations;
+	return false;
 }
 
 static List<HashSet<(int X, int Y, int Z)>> ReadInput()
