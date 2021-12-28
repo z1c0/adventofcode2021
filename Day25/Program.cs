@@ -8,7 +8,7 @@ Console.WriteLine($"END (after {sw.Elapsed.TotalSeconds} seconds)");
 
 static void Part1()
 {
-	var grid = Input.ParseCharGrid();
+	var grid = Input.ReadCharGrid();
 	var count = 0;
 	while (true)
 	{

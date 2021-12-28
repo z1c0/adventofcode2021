@@ -120,7 +120,7 @@ static void Print(Dictionary<(int X, int Y), bool> image)
 static (string Index, Dictionary<(int X, int Y), bool> Image) ReadInput()
 {
 	var lines = File.ReadAllLines("input.txt");
-	var grid = CharGrid.FromLines(lines.Skip(2));
+	var grid = Input.ParseCharGrid(lines.Skip(2));
 	var image = new Dictionary<(int X, int Y), bool>();
 	grid.ForEach(c => image[c] = grid[c] == '#');
 	Debug.Assert(lines[0].Length == 512);

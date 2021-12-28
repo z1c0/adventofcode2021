@@ -9,7 +9,7 @@ Console.WriteLine($"END (after {sw.Elapsed.TotalSeconds} seconds)");
 
 static void Part1()
 {
-	var grid = ReadInput();
+	var grid = Input.ReadIntGrid();
 	var lowPoints = GetLowPoints(grid);
 	var riskLevel = lowPoints.Sum(p => grid[p] + 1);
 	Console.WriteLine($"Total risk level: {riskLevel}");
@@ -17,7 +17,7 @@ static void Part1()
 
 static void Part2()
 {
-	var grid = ReadInput();
+	var grid = Input.ReadIntGrid();
 	var lowPoints = GetLowPoints(grid);
 	var basinSizes = new List<int>();
 	foreach (var p in lowPoints)
@@ -67,9 +67,4 @@ static IEnumerable<(int X, int Y)> GetLowPoints(Grid<int> grid)
 			}
 		}
 	}
-}
-
-static Grid<int> ReadInput()
-{
-	return IntGrid.FromFile("input.txt");
 }

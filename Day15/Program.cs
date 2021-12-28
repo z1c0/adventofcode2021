@@ -9,7 +9,7 @@ Console.WriteLine($"END (after {sw.Elapsed.TotalSeconds} seconds)");
 
 static void Part1(bool enlargeGrid)
 {
-	var grid = ReadInput();
+	var grid = Input.ReadIntGrid();
 	if (enlargeGrid)
 	{
 		grid = EnlargeGrid(grid);
@@ -67,15 +67,5 @@ static void FindPath(Grid<int> grid)
 				}
 			}
 		}
-		else
-		{
-			System.Console.WriteLine("b");
-		}
 	}
-	//throw new InvalidOperationException();
-}
-
-static Grid<int> ReadInput()
-{
-	return IntGrid.FromFile("input.txt");
 }

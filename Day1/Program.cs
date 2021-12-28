@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using aoc;
 
 Console.WriteLine("Day 1 - START");
 var sw = Stopwatch.StartNew();
@@ -8,7 +9,7 @@ Console.WriteLine($"END (after {sw.Elapsed.TotalSeconds} seconds)");
 
 static void Part1(int windowSize)
 {
-	var depths = ReadInput().ToList();
+	var depths = Input.ReadIntList().ToList();
 	var count = 0;
 	for (var i = 0; i < depths.Count - windowSize; i++)
 	{
@@ -25,12 +26,4 @@ static void Part1(int windowSize)
 		}
 	}
 	Console.WriteLine($"{count} measurements are larger than the previous one.");
-}
-
-static IEnumerable<int> ReadInput()
-{
-	foreach (var line in File.ReadAllLines("input.txt"))
-	{
-		yield return int.Parse(line);
-	}
 }

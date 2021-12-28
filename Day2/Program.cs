@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using aoc;
 
 Console.WriteLine("Day 2 - START");
 var sw = Stopwatch.StartNew();
@@ -66,17 +67,16 @@ static void Part2()
 
 static IEnumerable<(Direction Direction, int Value)> ReadInput()
 {
-	foreach (var line in File.ReadAllLines("input.txt"))
+	foreach (var t in Input.ReadStringIntList())
 	{
-		var tokens = line.Split(' ');
-		var direction = tokens[0] switch
+		var direction = t.String switch
 		{
 			"forward" => Direction.Forward,
 			"down" => Direction.Down,
 			"up" => Direction.Up,
 			_ => throw new InvalidOperationException(),
 		};
-		yield return (direction, int.Parse(tokens[1]));
+		yield return (direction, t.Int);
 	}
 }
 

@@ -9,7 +9,7 @@ Console.WriteLine($"END (after {sw.Elapsed.TotalSeconds} seconds)");
 
 static void Part1(int steps)
 {
-	var grid = ReadInput();
+	var grid = Input.ReadIntGrid();
 	var flashCount = 0;
 	for (var i = 0; i < steps; i++)
 	{
@@ -51,9 +51,4 @@ static void Part1(int steps)
 		}
 	}
 	Console.WriteLine($"Number of flashes after {steps} steps: {flashCount}");
-}
-
-static Grid<int> ReadInput()
-{
-	return IntGrid.FromFile("input.txt");
 }

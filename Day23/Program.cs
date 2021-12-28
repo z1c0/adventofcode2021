@@ -9,7 +9,7 @@ Console.WriteLine($"END (after {sw.Elapsed.TotalSeconds} seconds)");
 
 static void Part1(string fileName)
 {	
-	var grid = Input.ParseCharGrid(fileName);
+	var grid = Input.ReadCharGrid(fileName);
 	grid.Print();
 	var cache = new Dictionary<string, int>();
 	var minEnergy = int.MaxValue;
